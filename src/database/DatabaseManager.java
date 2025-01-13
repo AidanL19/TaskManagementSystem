@@ -13,12 +13,6 @@ public class DatabaseManager {
 
     // Method to establish and return a connection to the database
     public static Connection getConnection() throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver"); 
-        } 
-        catch (ClassNotFoundException e) {
-            throw new SQLException("MySQL Driver not found!", e);
-        }
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
