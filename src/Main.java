@@ -1,6 +1,7 @@
 import database.DatabaseManager;
 import database.TaskDAO;
 import models.Task;
+import utils.TimeZoneUtils;
 
 import java.sql.Connection;
 import java.time.LocalDateTime;
@@ -65,23 +66,49 @@ public class Main {
         try {
             System.out.print("Enter title: ");
             String title = scanner.nextLine();
-
+    
             System.out.print("Enter description: ");
             String description = scanner.nextLine();
-
+    
             System.out.print("Enter due date (yyyy-MM-ddTHH:mm:ss): ");
             String dueDateInput = scanner.nextLine();
             LocalDateTime dueDate = LocalDateTime.parse(dueDateInput);
-
-            System.out.print("Enter timezone (Region/City): ");
-            String timeZone = scanner.nextLine();
-
-            System.out.print("Enter status (pending/completed): ");
+    
+            String timeZone;
+            String utcOffset;
+    
+            // Keep prompting for a valid time zone until the user provides one.
+            while (true) {
+                System.out.print("Enter timezone (e.g., America/New_York): ");
+                timeZone = scanner.nextLine();
+    
+                // Validate the entered time zone.
+                if (TimeZoneUtils.isValidTimeZone(timeZone)) {
+                    utcOffset = TimeZoneUtils.getUTCOffset(timeZone);
+    
+                    // Ensure the UTC offset is valid.
+                    if (utcOffset != null && !utcOffset.isEmpty()) {
+                        // Exit the loop if both the time zone and offset are valid.
+                        break; 
+                    } 
+                    else {
+                        System.out.println("Error: Unable to fetch UTC offset. Please try again.");
+                    }
+                } 
+                else {
+                    System.out.println("Invalid timezone. Please try again.");
+                }
+            }
+    
+            // Adjust the due date to UTC using the valid offset.
+            LocalDateTime dueDateInUTC = adjustToUTC(dueDate, utcOffset);
+    
+            System.out.print("Enter status (e.g., pending/completed): ");
             String status = scanner.nextLine();
-
-            // Create a new task object.
-            Task task = new Task(title, description, dueDate, timeZone, status);
-
+    
+            // Create a new task object with the adjusted due date.
+            Task task = new Task(title, description, dueDateInUTC, timeZone, status);
+    
             // Add the task to the database.
             taskDAO.addTask(task);
             System.out.println("Task added successfully!");
@@ -90,6 +117,7 @@ public class Main {
             System.err.println("Failed to add task: " + e.getMessage());
         }
     }
+    
 
     // Retrieves and displays all tasks from the database.
     private static void viewAllTasks(TaskDAO taskDAO) {
@@ -145,6 +173,24 @@ public class Main {
         } 
         catch (Exception e) {
             System.err.println("Failed to delete task: " + e.getMessage());
+        }
+    }
+
+    // Adjusts a LocalDateTime to UTC based on the given offset (e.g., +05:00 or -03:30).
+    private static LocalDateTime adjustToUTC(LocalDateTime localDateTime, String utcOffset) {
+        // Extract hours.
+        int hours = Integer.parseInt(utcOffset.substring(1, 3));
+        // Extract minutes.
+        int minutes = Integer.parseInt(utcOffset.substring(4, 6)); 
+        // Check if the offset is negative.
+        boolean isNegative = utcOffset.startsWith("-"); 
+
+        // Adjust the LocalDateTime by subtracting the offset to convert to UTC.
+        if (isNegative) {
+            return localDateTime.plusHours(hours).plusMinutes(minutes);
+        } 
+        else {
+            return localDateTime.minusHours(hours).minusMinutes(minutes);
         }
     }
 }
