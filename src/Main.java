@@ -64,6 +64,7 @@ public class Main {
     // Prompts the user to input task details and adds the task to the database.
     private static void addTask(TaskDAO taskDAO, Scanner scanner) {
         try {
+            // Prompt for task details.
             System.out.print("Enter title: ");
             String title = scanner.nextLine();
     
@@ -77,19 +78,15 @@ public class Main {
             String timeZone;
             String utcOffset;
     
-            // Keep prompting for a valid time zone until the user provides one.
+            // Validate the time zone and fetch UTC offset.
             while (true) {
                 System.out.print("Enter timezone (e.g., America/New_York): ");
                 timeZone = scanner.nextLine();
     
-                // Validate the entered time zone.
                 if (TimeZoneUtils.isValidTimeZone(timeZone)) {
                     utcOffset = TimeZoneUtils.getUTCOffset(timeZone);
-    
-                    // Ensure the UTC offset is valid.
                     if (utcOffset != null && !utcOffset.isEmpty()) {
-                        // Exit the loop if both the time zone and offset are valid.
-                        break; 
+                        break;
                     } 
                     else {
                         System.out.println("Error: Unable to fetch UTC offset. Please try again.");
@@ -100,14 +97,14 @@ public class Main {
                 }
             }
     
-            // Adjust the due date to UTC using the valid offset.
-            LocalDateTime dueDateInUTC = adjustToUTC(dueDate, utcOffset);
+            // Convert dueDate to UTC using the offset.
+            LocalDateTime dueDateUtc = adjustToUTC(dueDate, utcOffset);
     
-            System.out.print("Enter status (e.g., pending/completed): ");
+            System.out.print("Enter status (pending/completed): ");
             String status = scanner.nextLine();
     
-            // Create a new task object with the adjusted due date.
-            Task task = new Task(title, description, dueDateInUTC, timeZone, status);
+            // Create a new Task object with both original and UTC due dates.
+            Task task = new Task(title, description, dueDate, timeZone, dueDateUtc, status);
     
             // Add the task to the database.
             taskDAO.addTask(task);
@@ -117,6 +114,7 @@ public class Main {
             System.err.println("Failed to add task: " + e.getMessage());
         }
     }
+    
     
 
     // Retrieves and displays all tasks from the database.

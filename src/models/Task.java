@@ -15,25 +15,29 @@ public class Task {
     private LocalDateTime dueDate;
     // Time zone of the task 
     private String timeZone;
+    // UTC due date and time of the task
+    private LocalDateTime dueDateUTC;
     // Current status of the task 
     private String status; 
 
     // Constructor with all fields, used for tasks retrieved from the database
-    public Task(int id, String title, String description, LocalDateTime dueDate, String timeZone, String status) {
+    public Task(int id, String title, String description, LocalDateTime dueDate, String timeZone, LocalDateTime dueDateUTC, String status) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
         this.timeZone = timeZone;
+        this.dueDateUTC = dueDateUTC;
         this.status = status;
     }
 
     // Constructor without ID, used for new tasks before they're saved in the database
-    public Task(String title, String description, LocalDateTime dueDate, String timeZone, String status) {
+    public Task(String title, String description, LocalDateTime dueDate, String timeZone, LocalDateTime dueDateUTC, String status) {
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
         this.timeZone = timeZone;
+        this.dueDateUTC = dueDateUTC;
         this.status = status;
     }
 
@@ -89,6 +93,16 @@ public class Task {
         this.timeZone = timeZone; 
     }
 
+    // Get the task's UTC due date
+    public LocalDateTime getDueDateUTC() {
+        return dueDateUTC; 
+    }
+
+    // Set the task's UTC due date
+    public void setDueDateUTC(LocalDateTime dueDateUTC) {
+        this.dueDateUTC = dueDateUTC; 
+    }
+
     // Get the task's status
     public String getStatus() {
         return status; 
@@ -107,6 +121,7 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", dueDate=" + dueDate +
                 ", timeZone='" + timeZone + '\'' +
+                ", dueDateUTC=" + dueDateUTC +
                 ", status='" + status + '\'' +
                 '}';
     }

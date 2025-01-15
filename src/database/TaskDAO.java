@@ -15,13 +15,14 @@ public class TaskDAO {
 
     // Adds a new task to the database.
     public void addTask(Task task) throws SQLException {
-        String query = "INSERT INTO tasks (title, description, due_date, timezone, status) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO tasks (title, description, due_date, timezone, due_date_utc, status) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, task.getTitle());
             statement.setString(2, task.getDescription());
             statement.setTimestamp(3, Timestamp.valueOf(task.getDueDate()));
             statement.setString(4, task.getTimeZone());
-            statement.setString(5, task.getStatus());
+            statement.setTimestamp(5, Timestamp.valueOf(task.getDueDateUTC()));
+            statement.setString(6, task.getStatus());
             statement.executeUpdate();
         }
     }
@@ -39,6 +40,7 @@ public class TaskDAO {
                     resultSet.getString("description"),
                     resultSet.getTimestamp("due_date").toLocalDateTime(),
                     resultSet.getString("timezone"),
+                    resultSet.getTimestamp("due_date_utc").toLocalDateTime(),
                     resultSet.getString("status")
                 );
                 tasks.add(task);
@@ -60,6 +62,7 @@ public class TaskDAO {
                         resultSet.getString("description"),
                         resultSet.getTimestamp("due_date").toLocalDateTime(),
                         resultSet.getString("timezone"),
+                        resultSet.getTimestamp("due_date_utc").toLocalDateTime(),
                         resultSet.getString("status")
                     );
                 }
@@ -70,14 +73,15 @@ public class TaskDAO {
 
     // Updates an existing task in the database.
     public void updateTask(Task task) throws SQLException {
-        String query = "UPDATE tasks SET title = ?, description = ?, due_date = ?, timezone = ?, status = ? WHERE id = ?";
+        String query = "UPDATE tasks SET title = ?, description = ?, due_date = ?, timezone = ?, due_date_utc = ?, status = ? WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, task.getTitle());
             statement.setString(2, task.getDescription());
             statement.setTimestamp(3, Timestamp.valueOf(task.getDueDate()));
             statement.setString(4, task.getTimeZone());
-            statement.setString(5, task.getStatus());
-            statement.setInt(6, task.getId());
+            statement.setTimestamp(5, Timestamp.valueOf(task.getDueDateUTC()));
+            statement.setString(6, task.getStatus());
+            statement.setInt(7, task.getId());
             statement.executeUpdate();
         }
     }

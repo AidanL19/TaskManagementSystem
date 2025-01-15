@@ -66,6 +66,9 @@ public class TimeZoneUtils {
             // Find the end of the utc_offset value.
             int offsetEnd = jsonResponse.indexOf("\"", offsetStart); 
             // Extract and return the utc_offset value.
+            System.out.println(offsetStart);
+            System.out.println(offsetEnd);
+            System.out.println(jsonResponse);
             return jsonResponse.substring(offsetStart, offsetEnd); 
         } 
         catch (Exception e) {
